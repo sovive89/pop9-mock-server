@@ -1,10 +1,13 @@
 import { waitUntil } from '@vercel/functions';
+import { injectSpeedInsights } from '@vercel/speed-insights';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { InjectOptions } from 'fastify';
 import { RedisRestRepository } from '../src/storage/redis-rest.js';
 import { ServerlessRuntime } from '../src/serverless/runtime.js';
 import { HttpError } from '../src/core/errors/index.js';
 import { timingSafeEqual } from 'node:crypto';
+
+injectSpeedInsights();
 
 export default async function handler(request: IncomingMessage & { body?: unknown }, response: ServerResponse) {
   response.setHeader('Cache-Control', 'no-store');
