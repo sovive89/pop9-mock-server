@@ -1,4 +1,5 @@
 import { buildApp } from './app.js';
+import { injectSpeedInsights } from '@vercel/speed-insights';
 
 const production = process.env.NODE_ENV === 'production';
 const adminToken = process.env.ADMIN_TOKEN || undefined;
@@ -9,6 +10,7 @@ if (production && (!adminToken || !deliveryToken || adminToken === deliveryToken
 const port = Number(process.env.PORT ?? 3000);
 if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Invalid PORT');
 const { app } = buildApp({ adminToken, deliveryToken, logLevel: process.env.LOG_LEVEL });
+injectSpeedInsights();
 let stopping = false;
 const shutdown = async () => {
   if (stopping) return;
