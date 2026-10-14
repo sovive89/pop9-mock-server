@@ -13,7 +13,13 @@ export async function sendWebhook(message: WebhookMessage, config: ProviderConfi
     // The Hub credential is server-side only and must never be logged.
     const token = process.env.HUB_WEBHOOK_BEARER_TOKEN;
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) headers.Authorization = `Bearer ${token}`;
+    if (token) {
+      const trustedDestination = process.env.HUB_WEBHOOK_DESTINATION;
+      if (!trustedDestination || destination !== trustedDestination || new URL(destination).protocol !== 'https:') {
+        throw new Error('Hub webhook destination is not explicitly trusted');
+      }
+      headers.Authorization = `Bearer ${token}`;
+    }
     const response = await fetch(destination, {
       method: 'POST', redirect: 'error', headers, body: message.body,
       signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(config.webhookTimeoutMs)]) : AbortSignal.timeout(config.webhookTimeoutMs),
