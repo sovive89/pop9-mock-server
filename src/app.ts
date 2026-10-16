@@ -8,6 +8,7 @@ import { RateLimiter } from './core/rate-limit/index.js';
 import { DeliveryService } from './providers/delivery-a/service.js';
 import { deliveryRoutes } from './providers/delivery-a/routes.js';
 import { adminRoutes } from './admin/routes.js';
+import { marketplaceRoutes } from './providers/marketplace-lab/routes.js';
 
 export interface AppOptions { logger?: boolean; logLevel?: string; adminToken?: string; deliveryToken?: string; now?: () => number; random?: () => number; deferredWebhooks?: boolean; skipLatency?: boolean }
 export function buildApp(options: AppOptions = {}) {
@@ -29,6 +30,7 @@ export function buildApp(options: AppOptions = {}) {
   });
   app.get('/health', async () => ({ status: 'ok', application: 'pop9-mock-server' }));
   app.register(async scope => deliveryRoutes(scope, { service, engine, limiter, token: options.deliveryToken, skipLatency: options.skipLatency }), { prefix: '/delivery-a' });
+  app.register(async scope => marketplaceRoutes(scope, options.deliveryToken));
   app.register(async scope => adminRoutes(scope, { store, dispatcher, limiter, token: options.adminToken }), { prefix: '/admin' });
   app.addHook('onClose', async () => { dispatcher.reset(); });
   return { app, lab: { store, dispatcher, limiter } };
